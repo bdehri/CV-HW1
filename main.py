@@ -19,17 +19,21 @@ def probdensityfunc(histogram, shape):
     return probdensity
 
 
+def cumulativedistfuncrgb(probdensity):
+    return np.cumsum(probDensity1[..., 0, 0]), np.cumsum(probDensity1[..., 0, 1]), np.cumsum(probDensity1[..., 0, 2])
+
+
 histogram1 = np.zeros((256, 1, 3), dtype=np.uint32)
 histogram2 = np.zeros((256, 1, 3), dtype=np.uint32)
 probDensity1 = np.zeros((256, 1, 3), dtype=np.float32)
 probDensity2 = np.zeros((256, 1, 3), dtype=np.float32)
-cdf = np.zeros((256,1,1),dtype=np.uint8)
+cdf = np.zeros((256,1,3),dtype=np.uint32)
 
 x_pos = [i for i in range(256)]
 
 img = cv2.imread("color1.png", cv2.IMREAD_COLOR)
 img2 = cv2.imread("color2.png", cv2.IMREAD_COLOR)
-print(np.sum(img,1))
+
 imgShape = img.shape[0] * img.shape[1]
 
 histogram1 = histogram(img)
@@ -38,23 +42,7 @@ histogram2 = histogram(img2)
 probDensity1 = probdensityfunc(histogram1, imgShape)
 probDensity2 = probdensityfunc(histogram2, imgShape)
 
-
-
-print(histogram1[...,0,1])
-print("AAAAAAAAAAAAAA")
-print(histr)
-
-#prodens = histr/imgShape
-#print("me")
-#print(probDensity1[...,0,1])
-#print("you")
-#print(prodens)
-#print("me")
-#print(np.cumsum(probDensity1[...,0,1]))
-#print("you")
-#print(np.cumsum(prodens))
-#print(probDensity1)
-#print(probDensity2)
+print(np.cumsum(probDensity1[...,0,0]))
 
 
 plt.bar(x_pos, histogram1[..., 0, 1])
