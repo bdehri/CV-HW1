@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-%matplotlib inline
 
 
 def histogram(i):
@@ -17,6 +16,7 @@ def histogram(i):
 histogram1 = np.zeros((256, 1, 3), dtype=np.uint8)
 histogram2 = np.zeros((256, 1, 3), dtype=np.uint8)
 
+x_pos = [i for i in range(256)]
 
 img = cv2.imread("color1.png")
 img2 = cv2.imread("color2.png")
@@ -25,11 +25,11 @@ histogram1 = histogram(img)
 histogram2 = histogram(img2)
 print(img.shape)
 print(img2.shape)
-print(histogram1.shape)
+print(histogram1[...,0,0])
 print(histogram2.shape)
 
-plt.bar(histogram1[...,0,0])
-
+plt.bar(x_pos,histogram1[...,0,2])
+plt.show()
 
 cv2.imshow('img', img2)
 
