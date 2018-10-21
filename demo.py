@@ -6,10 +6,11 @@
 #
 # WARNING! All changes made in this file will be lost!
 
+#in order to run the code python3.6 demo.py
+
 from PyQt5 import QtCore, QtGui, QtWidgets
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-import random
 import cv2
 import numpy as np
 
@@ -74,10 +75,28 @@ class Ui_MainWindow(object):
         self.frame_3.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame_3.setObjectName("frame_3")
 
+        self.figure7 = Figure()
+        self.figure7.clear()
+        self.canvas7 = FigureCanvas(self.figure7)
+        self.canvas7.setParent(self.centralwidget)
+        self.canvas7.setGeometry(QtCore.QRect(1041, 500, 501,200))
+
+        self.figure8 = Figure()
+        self.figure8.clear()
+        self.canvas8 = FigureCanvas(self.figure8)
+        self.canvas8.setParent(self.centralwidget)
+        self.canvas8.setGeometry(QtCore.QRect(1041, 700, 501,200))
+
+        self.figure9 = Figure()
+        self.figure9.clear()
+        self.canvas9 = FigureCanvas(self.figure9)
+        self.canvas9.setParent(self.centralwidget)
+        self.canvas9.setGeometry(QtCore.QRect(1041, 900, 501,200))
+
         self.pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton.setGeometry(QtCore.QRect(10, 0, 151, 32))
         self.pushButton.setObjectName("pushButton")
-        self.pushButton.clicked.connect(self.handleplot)
+        self.pushButton.clicked.connect(self.handlehistogrammatch)
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
@@ -103,6 +122,13 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuFile.menuAction())
         self.retranslateUi(MainWindow)
 
+        self.histogramtarget = np.zeros((256, 1, 3), dtype=np.uint32)
+        self.histograminput = np.zeros((256, 1, 3), dtype=np.uint32)
+        self.prodensitytarget = np.zeros((256, 1, 3), dtype=np.float32)
+        self.prodensityinput = np.zeros((256, 1, 3), dtype=np.float32)
+        self.cdfinput = np.zeros((256, 1, 3), dtype=np.float32)
+        self.cdftarget = np.zeros((256, 1, 3), dtype=np.float32)
+        self.lut = np.zeros((256, 1, 3), dtype=np.float32)
 
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
@@ -196,6 +222,39 @@ class Ui_MainWindow(object):
 
         return lut
 
+
+    def handlehistogrammatch(self):
+        self.prodensitytarget = self.probdensityfunc(self.histogramtarget,self.img2.shape[0]*self.img2.shape[1])
+        self.prodensityinput = self.probdensityfunc(self.histograminput,self.img.shape[0]*self.img.shape[1])
+
+        self.cdfinput[..., 0, 0], self.cdfinput[..., 0, 1], self.cdfinput[..., 0, 2] = self.cumulativedistfuncrgb(self.prodensityinput)
+        self.cdftarget[..., 0, 0], self.cdftarget[..., 0, 1], self.cdftarget[..., 0, 2], = self.cumulativedistfuncrgb(self.prodensitytarget)
+        self.lut = self.createlookuptable(self.cdfinput, self.cdftarget)
+
+        for i in range(self.img.shape[0]):
+            for y in range(self.img.shape[1]):
+                self.img[i, y, 0] = self.lut[self.img[i, y, 0], 0, 0]
+                self.img[i, y, 1] = self.lut[self.img[i, y, 1], 0, 1]
+                self.img[i, y, 2] = self.lut[self.img[i, y, 2], 0, 2]
+        cv2.imwrite('color3.png',self.img)
+        picres = QtWidgets.QLabel(self.frame_3)
+        picres.setPixmap(QtGui.QPixmap("color3.png"))
+        picres.show()
+        self.x_pos2 = [i for i in range(256)]
+
+        self.histogramres = self.histogram(self.img)
+
+        self.axes7 = self.figure7.add_subplot(111)
+        self.axes7.bar(self.x_pos2, self.histogramres[..., 0, 0], color='b')
+        self.canvas7.draw()
+
+        self.axes8 = self.figure8.add_subplot(111)
+        self.axes8.bar(self.x_pos2, self.histogramres[..., 0, 1], color='g')
+        self.canvas8.draw()
+
+        self.axes9 = self.figure9.add_subplot(111)
+        self.axes9.bar(self.x_pos2, self.histogramres[..., 0, 2], color='r')
+        self.canvas9.draw()
 
 if __name__ == "__main__":
     import sys
