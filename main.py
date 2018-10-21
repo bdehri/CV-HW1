@@ -14,20 +14,20 @@ def histogram(i):
 
 
 def probdensityfunc(histogram, shape):
-    probdensity = np.zeros((256, 1, 3), dtype=np.uint8)
+    probdensity = np.zeros((256, 1, 3), dtype=np.uint32)
     probdensity = histogram / shape
     return probdensity
 
 
 def cumulativedistfuncrgb(probdensity):
-    return np.cumsum(probDensity1[..., 0, 0]), np.cumsum(probDensity1[..., 0, 1]), np.cumsum(probDensity1[..., 0, 2])
+    return np.cumsum(probdensity[..., 0, 0]), np.cumsum(probdensity[..., 0, 1]), np.cumsum(probdensity[..., 0, 2])
 
 
 histogram1 = np.zeros((256, 1, 3), dtype=np.uint32)
 histogram2 = np.zeros((256, 1, 3), dtype=np.uint32)
 probDensity1 = np.zeros((256, 1, 3), dtype=np.float32)
 probDensity2 = np.zeros((256, 1, 3), dtype=np.float32)
-cdf = np.zeros((256,1,3),dtype=np.uint32)
+cdf = np.zeros((256, 1, 3), dtype=np.float32)
 
 x_pos = [i for i in range(256)]
 
@@ -42,7 +42,7 @@ histogram2 = histogram(img2)
 probDensity1 = probdensityfunc(histogram1, imgShape)
 probDensity2 = probdensityfunc(histogram2, imgShape)
 
-print(np.cumsum(probDensity1[...,0,0]))
+cdf[..., 0, 0], cdf[..., 0, 1], cdf[..., 0, 2] = cumulativedistfuncrgb(probDensity1)
 
 
 plt.bar(x_pos, histogram1[..., 0, 1])
@@ -52,6 +52,7 @@ plt.show()
 plt.bar(x_pos, probDensity1[..., 0, 1])
 plt.title("probdens")
 plt.show()
+
 
 
 
